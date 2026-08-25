@@ -1,0 +1,23 @@
+{
+  "name": "technicalinterview-e2e-playwright",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZTaia/technicalinterview-e2e-playwright.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ZTaia/technicalinterview-e2e-playwright/issues"
+  },
+  "homepage": "https://github.com/ZTaia/technicalinterview-e2e-playwright#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.3.0"
+  }
+}
