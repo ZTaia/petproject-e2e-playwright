@@ -54,9 +54,12 @@ export class SystemUsersPage {
             .filter({ hasText: 'Username' });
 
         this.usernameInput = usernameInputGroup.getByRole('textbox');
-        this.usernameRequiredMessage = usernameInputGroup.getByText('Required', {
-            exact: true,
-        });
+        this.usernameRequiredMessage = usernameInputGroup.getByText(
+            'Required',
+            {
+                exact: true,
+            },
+        );
 
         this.passwordInput = page
             .locator('.oxd-input-group')
@@ -95,7 +98,6 @@ export class SystemUsersPage {
     }
 
     private async fillUserForm(user: UserData): Promise<void> {
-
         await this.userRoleDropdown.click();
         await this.page
             .getByRole('option', { name: user.role, exact: true })
@@ -138,7 +140,7 @@ export class SystemUsersPage {
         await userRow
             .locator('button')
             .filter({
-                has: this.page.locator('i.bi-pencil-fill')
+                has: this.page.locator('i.bi-pencil-fill'),
             })
             .click();
     }
@@ -153,7 +155,9 @@ export class SystemUsersPage {
             .click();
 
         await this.statusDropdown.click();
-        await this.page.getByRole('option', { name: status, exact: true }).click();
+        await this.page
+            .getByRole('option', { name: status, exact: true })
+            .click();
 
         await this.saveButton.click();
         await this.page.waitForURL(/viewSystemUsers/);

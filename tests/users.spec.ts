@@ -84,7 +84,9 @@ test('Admin manages system user', async ({ page }) => {
                 await test.step('Clean up the created user after failure', async () => {
                     await usersPage.findUser(user.username);
 
-                    if ((await usersPage.getUserRow(user.username).count()) > 0) {
+                    if (
+                        (await usersPage.getUserRow(user.username).count()) > 0
+                    ) {
                         await usersPage.deleteUser(user.username);
                     }
                 });
