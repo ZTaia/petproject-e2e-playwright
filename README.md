@@ -41,12 +41,12 @@ npx playwright install chromium
 The public demo values are defaults, so no local configuration is required for
 the standard run. They can be overridden with shell or CI environment variables:
 
-| Variable | Default |
-| --- | --- |
-| `BASE_URL` | `https://opensource-demo.orangehrmlive.com/` |
-| `ADMIN_USERNAME` | `Admin` |
-| `ADMIN_PASSWORD` | `admin123` |
-| `EMPLOYEE_NAME` | `Timothy Lewis Amiano` |
+| Variable         | Default                                      |
+| ---------------- | -------------------------------------------- |
+| `BASE_URL`       | `https://opensource-demo.orangehrmlive.com/` |
+| `ADMIN_USERNAME` | `Admin`                                      |
+| `ADMIN_PASSWORD` | `admin123`                                   |
+| `EMPLOYEE_NAME`  | `Timothy Lewis Amiano`                       |
 
 Example:
 
@@ -164,7 +164,61 @@ Accessible names would improve both product accessibility and test resilience.
 
 1. Add an `@smoke` tag and a corresponding package script.
 2. Extract authentication and cleanup into fixtures if the suite grows.
-3. Add linting and run type checking and formatting checks in automation.
+3. Add ESLint (with `eslint-plugin-playwright`) to the quality checks.
+
+## CI
+
+The GitHub Actions workflow is in `.github/workflows/playwright.yml`.
+
+**When it runs:** on pushes to `main`, on pull requests targeting `main`, and
+manually from the **Actions** tab (**Playwright Tests** → **Run workflow**). A
+newer run on the same branch or PR cancels the outdated one.
+
+**What runs:**
+
+| Job       | Steps                                                                     | Timeout |
+| --------- | ------------------------------------------------------------------------- | ------- |
+| `quality` | `npm ci`, `npm run typecheck`, `npm run format:check`                     | 10 min  |
+| `e2e`     | `npm ci`, install Chromium, `npm test` (runs only after `quality` passes) | 20 min  |
+
+npm dependencies are cached through `actions/setup-node`. Only Chromium is
+installed, because it is the only configured project.
+
+**Where to find results:** open the workflow run in the **Actions** tab and scroll
+to **Artifacts**.
+
+- `playwright-report` is uploaded on every run. Download it, unzip it and run
+  `npx playwright show-report <folder>` to view it.
+- `test-results` is uploaded only when the `e2e` job fails. It contains traces
+  and failure screenshots. Open a trace with
+  `npx playwright show-trace <path>/trace.zip` or at
+  [trace.playwright.dev](https://trace.playwright.dev). Traces are recorded on
+  the first retry, so they exist for tests that failed at least once.
+
+## AI-assisted workflow (Claude Code + Playwright MCP)
+
+The repository includes project-scoped configuration for
+[Claude Code](https://docs.claude.com/en/docs/claude-code) so that new tests can
+be drafted against the real UI instead of from guesswork.
+
+| File                                          | Purpose                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.mcp.json`                                   | Registers the [Playwright MCP](https://github.com/microsoft/playwright-mcp) server (`npx @playwright/mcp@latest`), which gives the agent a real browser to explore the app and read its accessibility tree.                                                                                                                                                                      |
+| `.claude/agents/playwright-test-generator.md` | A subagent that reads the existing page objects and specs, explores the requested flow on `BASE_URL` with the demo credentials, proposes a test plan and waits for approval. It then implements page objects and specs following the conventions in this README, runs the new spec plus `typecheck` and `format:check`, and ends with a summary of coverage, gaps and flakiness. |
+| `.claude/settings.json`                       | Guardrails: denies `git commit`, `push`, `merge`, `rebase`, `reset`, `checkout` and `switch`, and blocks edits to `playwright.config.ts`, `config/**` and `package.json`.                                                                                                                                                                                                        |
+
+The agent never commits. It must not touch data it did not create on the shared
+demo, and it stops instead of working around app or environment failures.
+**Every generated test is reviewed, run and committed by a human.**
+
+Example prompt:
+
+```text
+Use the playwright-test-generator agent to add coverage for Admin > Job > Job Titles:
+create a job title with a unique name, verify it appears in the list, edit its
+description, then delete it. Add negative cases for an empty title and a
+duplicate title. Show me the test plan before writing code.
+```
 
 ## Reporting
 
