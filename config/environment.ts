@@ -8,8 +8,5 @@ export const environment = {
     ),
     adminUsername: environmentValue('ADMIN_USERNAME', 'Admin'),
     adminPassword: environmentValue('ADMIN_PASSWORD', 'admin123'),
-    employeeName: environmentValue(
-        'EMPLOYEE_NAME',
-        'Timothy Lewis Amiano',
-    ),
+    employeeName: environmentValue('EMPLOYEE_NAME', 'Timothy Lewis Amiano'),
 } as const;
